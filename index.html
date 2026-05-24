@@ -5,11 +5,52 @@
     <title>NYC AR</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #button-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        #surprise-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        #surprise-btn:active {
+            transform: scale(0.95);
+        }
+        #counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+    </style>
 </head>
-<body style='margin: 0px; overflow: hidden;'>
-    <div id="debug" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #0f0; padding: 10px; font-family: monospace; font-size: 12px; z-index: 1000; max-width: 300px;">
-        <div>Initializing...</div>
+<body>
+    <div id="counter">1/3</div>
+    <div id="button-container">
+        <button id="surprise-btn">Swipe for surprise</button>
     </div>
 
     <a-scene
@@ -21,16 +62,14 @@
         
         <a-assets>
             <a-asset-item id="cat" src="https://raw.githubusercontent.com/linaxinari/NYC/main/sitting_cat2.glb"></a-asset-item>
+            <a-asset-item id="ghost" src="https://raw.githubusercontent.com/linaxinari/NYC/main/ghost_w_tophat.glb"></a-asset-item>
+            <a-asset-item id="gru" src="https://raw.githubusercontent.com/linaxinari/NYC/main/gru_gru.glb"></a-asset-item>
         </a-assets>
 
-        <!-- QR Code Marker -->
-        <a-marker
-            type='qr'
-            url='https://raw.githubusercontent.com/linaxinari/NYC/main/sitting_cat2.glb'
-            id="qr-marker">
+        <!-- Pattern Marker -->
+        <a-marker preset="hiro" id="marker">
             <a-entity
-                id="cat-model"
-                gltf-model="#cat"
+                id="model"
                 position="0 0 0"
                 scale="0.5 0.5 0.5"
                 rotation="0 0 0">
@@ -41,37 +80,30 @@
     </a-scene>
 
     <script>
-        const debugDiv = document.getElementById('debug');
-        const scene = document.getElementById('scene');
-        
-        function log(msg) {
-            console.log(msg);
-            debugDiv.innerHTML += '<div>' + msg + '</div>';
+        const models = [
+            { id: 'cat', name: 'Cat' },
+            { id: 'ghost', name: 'Ghost' },
+            { id: 'gru', name: 'Gru' }
+        ];
+
+        let currentModelIndex = 0;
+        const modelEntity = document.getElementById('model');
+        const btn = document.getElementById('surprise-btn');
+        const counter = document.getElementById('counter');
+
+        function loadModel(index) {
+            const model = models[index];
+            modelEntity.setAttribute('gltf-model', `#${model.id}`);
+            counter.textContent = `${index + 1}/${models.length}`;
         }
 
-        log('✓ Page loaded');
-        log('✓ Waiting for QR code...');
-        log('Point camera at QR code');
-
-        scene.addEventListener('qrFound', function() {
-            log('✓ QR Code detected!');
+        btn.addEventListener('click', function() {
+            currentModelIndex = (currentModelIndex + 1) % models.length;
+            loadModel(currentModelIndex);
         });
 
-        scene.addEventListener('markerFound', function(event) {
-            log('✓ Marker found');
-        });
-
-        scene.addEventListener('markerLost', function(event) {
-            log('⚠ Marker lost');
-        });
-
-        // Monitor model loading
-        const model = document.getElementById('cat-model');
-        if (model) {
-            model.addEventListener('model-loaded', function() {
-                log('✓ Model loaded');
-            });
-        }
+        // Load first model on page load
+        loadModel(0);
     </script>
 </body>
 </html>
