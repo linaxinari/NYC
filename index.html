@@ -9,6 +9,38 @@
 
     <script src="path/to/three.min.js" defer></script>
 <script src="path/to/your-3d-logic.js" defer></script>
+
+    <a-assets>
+    <a-asset-item
+        id="cutecat"
+        src="https://raw.githubusercontent.com/linaxinari/NYC/main/cutecat.glb">
+    </a-asset-item>
+
+    <a-asset-item
+        id="bunny1"
+        src="https://raw.githubusercontent.com/linaxinari/NYC/main/bunny1.glb">
+    </a-asset-item>
+
+    <a-asset-item
+        id="chestnuts"
+        src="https://raw.githubusercontent.com/linaxinari/NYC/main/chestnuts.glb">
+    </a-asset-item>
+</a-assets>
+
+<a-marker
+    type="pattern"
+    url="https://raw.githubusercontent.com/linaxinari/NYC/main/pattern-qr-code1.patt">
+
+    <a-entity
+        id="model"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        scale="0.5 0.5 0.5">
+    </a-entity>
+
+</a-marker>
+
+<a-entity camera></a-entity>
     
 ```
 <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
@@ -67,39 +99,7 @@
  embedded
  arjs="sourceType: webcam; debugUIEnabled: false;"
  vr-mode-ui="enabled: false">
-
-```
-<a-assets>
-    <a-asset-item
-        id="cutecat"
-        src="https://raw.githubusercontent.com/linaxinari/NYC/main/cutecat.glb">
-    </a-asset-item>
-
-    <a-asset-item
-        id="bunny1"
-        src="https://raw.githubusercontent.com/linaxinari/NYC/main/bunny1.glb">
-    </a-asset-item>
-
-    <a-asset-item
-        id="chestnuts"
-        src="https://raw.githubusercontent.com/linaxinari/NYC/main/chestnuts.glb">
-    </a-asset-item>
-</a-assets>
-
-<a-marker
-    type="pattern"
-    url="https://raw.githubusercontent.com/linaxinari/NYC/main/pattern-qr-code1.patt">
-
-    <a-entity
-        id="model"
-        position="0 0.5 0"
-        rotation="0 0 0"
-        scale="0.5 0.5 0.5">
-    </a-entity>
-
-</a-marker>
-
-<a-entity camera></a-entity>
+    
 ```
 
 </a-scene>
