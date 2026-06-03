@@ -1,139 +1,55 @@
-<!doctype html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NYC AR</title>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
-        #button-container {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-        }
-        #surprise-btn {
-            padding: 15px 30px;
-            font-size: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        #counter {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 20px;
-            z-index: 1000;
-        }
-    </style>
-</head>
-<body>
+<script>
+    const models = [
+        { id: 'cutecat', name: 'Cat' },
+        { id: 'bunny1', name: 'Bunny' },
+        { id: 'chestnuts', name: 'Chestnuts' }
+    ];
+    let currentModelIndex = 0;
+    let isVisible = false;
+    const modelEntity = document.getElementById('model');
+    const counter = document.getElementById('counter');
 
-    <div id="counter">1/3</div>
-    <div id="button-container">
-        <button id="surprise-btn">Tap for Surprise</button>
-    </div>
+    function loadModel(index) {
+        modelEntity.removeAttribute('animation');
+        modelEntity.setAttribute('gltf-model', `#${models[index].id}`);
+        counter.textContent = `${index + 1}/${models.length}`;
+    }
 
-    <a-scene
-        mindar-image="imageTargetSrc: https://raw.githubusercontent.com/linaxinari/NYC/main/targets_starpattern.mind;"
-        color-space="sRGB"
-        renderer="colorManagement: true, physicallyCorrectLights"
-        vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
-
-        <a-assets>
-            <a-asset-item id="cutecat" src="https://raw.githubusercontent.com/linaxinari/NYC/main/cutecat.glb"></a-asset-item>
-            <a-asset-item id="bunny1" src="https://raw.githubusercontent.com/linaxinari/NYC/main/bunny1.glb"></a-asset-item>
-            <a-asset-item id="chestnuts" src="https://raw.githubusercontent.com/linaxinari/NYC/main/chestnuts.glb"></a-asset-item>
-        </a-assets>
-
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity mindar-image-target="targetIndex: 0" id="target">
-            <a-entity
-                id="model"
-                position="0 0 0"
-                scale="0 0 0">
-            </a-entity>
-        </a-entity>
-
-    </a-scene>
-
-    <script>
-        const models = [
-            { id: 'cutecat', name: 'Cat' },
-            { id: 'bunny1', name: 'Bunny' },
-            { id: 'chestnuts', name: 'Chestnuts' }
-        ];
-        let currentModelIndex = 0;
-        const modelEntity = document.getElementById('model');
-        const counter = document.getElementById('counter');
-
-        function loadModel(index) {
-            const model = models[index];
-            modelEntity.setAttribute('gltf-model', `#${model.id}`);
-            counter.textContent = `${index + 1}/${models.length}`;
-        }
-
-        function animateIn() {
-            modelEntity.setAttribute('animation', {
-                property: 'scale',
-                from: '0 0 0',
-                to: '0.5 0.5 0.5',
-                dur: 800,
-                easing: 'easeOutElastic'
-            });
-        }
-
-        function animateOut(callback) {
-            modelEntity.setAttribute('animation', {
-                property: 'scale',
-                from: '0.5 0.5 0.5',
-                to: '0 0 0',
-                dur: 300,
-                easing: 'easeInQuad'
-            });
-            setTimeout(callback, 300);
-        }
-
-        // Tap button — cycle to next model
-        document.getElementById('surprise-btn').addEventListener('click', () => {
-            animateOut(() => {
-                currentModelIndex = (currentModelIndex + 1) % models.length;
-                loadModel(currentModelIndex);
-                animateIn();
-            });
+    function animateIn() {
+        modelEntity.setAttribute('animation', {
+            property: 'scale',
+            from: '0 0 0',
+            to: '2 2 2',
+            dur: 800,
+            easing: 'easeOutElastic'
         });
+    }
 
-        // Marker detection
-        document.querySelector('#target').addEventListener('targetFound', () => {
+    function animateOut(callback) {
+        modelEntity.removeAttribute('animation');
+        modelEntity.setAttribute('scale', '0 0 0');
+        setTimeout(callback, 50);
+    }
+
+    document.getElementById('surprise-btn').addEventListener('click', () => {
+        if (!isVisible) return;
+        animateOut(() => {
+            currentModelIndex = (currentModelIndex + 1) % models.length;
+            loadModel(currentModelIndex);
             animateIn();
         });
+    });
 
-        document.querySelector('#target').addEventListener('targetLost', () => {
-            modelEntity.setAttribute('animation', {
-                property: 'scale',
-                from: '0.5 0.5 0.5',
-                to: '0 0 0',
-                dur: 300,
-                easing: 'easeInQuad'
-            });
-        });
+    document.querySelector('#target').addEventListener('targetFound', () => {
+        isVisible = true;
+        animateIn();
+    });
 
-        // Load first model on start
-        loadModel(0);
-    </script>
+    document.querySelector('#target').addEventListener('targetLost', () => {
+        isVisible = false;
+        modelEntity.removeAttribute('animation');
+        modelEntity.setAttribute('scale', '0 0 0');
+    });
 
-</body>
-</html>
+    loadModel(0);
+</script>
