@@ -1,55 +1,93 @@
-<script>
-    const models = [
-        { id: 'cutecat', name: 'Cat' },
-        { id: 'bunny1', name: 'Bunny' },
-        { id: 'chestnuts', name: 'Chestnuts' }
-    ];
-    let currentModelIndex = 0;
-    let isVisible = false;
-    const modelEntity = document.getElementById('model');
-    const counter = document.getElementById('counter');
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NYC AR</title>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+        #surprise-btn {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
 
-    function loadModel(index) {
-        modelEntity.removeAttribute('animation');
-        modelEntity.setAttribute('gltf-model', `#${models[index].id}`);
-        counter.textContent = `${index + 1}/${models.length}`;
-    }
+    <div id="counter">1/2</div>
+    <button id="surprise-btn">Tap for Surprise ✨</button>
 
-    function animateIn() {
-        modelEntity.setAttribute('animation', {
-            property: 'scale',
-            from: '0 0 0',
-            to: '2 2 2',
-            dur: 800,
-            easing: 'easeOutElastic'
+    <a-scene
+        mindar-image="imageTargetSrc: https://raw.githubusercontent.com/linaxinari/NYC/main/targets_starpattern.mind;"
+        color-space="sRGB"
+        renderer="colorManagement: true, physicallyCorrectLights"
+        vr-mode-ui="enabled: false"
+        device-orientation-permission-ui="enabled: false">
+
+        <a-assets>
+            <a-asset-item id="cutecat" src="https://raw.githubusercontent.com/linaxinari/NYC/main/cutecat.glb"></a-asset-item>
+            <a-asset-item id="bunny1" src="https://raw.githubusercontent.com/linaxinari/NYC/main/bunny1.glb"></a-asset-item>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0" id="target">
+
+            <a-entity id="cat"
+                gltf-model="#cutecat"
+                position="0 0 0"
+                scale="2 2 2"
+                visible="true">
+            </a-entity>
+
+            <a-entity id="bunny"
+                gltf-model="#bunny1"
+                position="0 0 0"
+                scale="2 2 2"
+                visible="false">
+            </a-entity>
+
+        </a-entity>
+
+    </a-scene>
+
+    <script>
+        let showingCat = true;
+        const cat = document.getElementById('cat');
+        const bunny = document.getElementById('bunny');
+        const counter = document.getElementById('counter');
+
+        document.getElementById('surprise-btn').addEventListener('click', () => {
+            showingCat = !showingCat;
+            cat.setAttribute('visible', showingCat);
+            bunny.setAttribute('visible', !showingCat);
+            counter.textContent = showingCat ? '1/2' : '2/2';
         });
-    }
+    </script>
 
-    function animateOut(callback) {
-        modelEntity.removeAttribute('animation');
-        modelEntity.setAttribute('scale', '0 0 0');
-        setTimeout(callback, 50);
-    }
-
-    document.getElementById('surprise-btn').addEventListener('click', () => {
-        if (!isVisible) return;
-        animateOut(() => {
-            currentModelIndex = (currentModelIndex + 1) % models.length;
-            loadModel(currentModelIndex);
-            animateIn();
-        });
-    });
-
-    document.querySelector('#target').addEventListener('targetFound', () => {
-        isVisible = true;
-        animateIn();
-    });
-
-    document.querySelector('#target').addEventListener('targetLost', () => {
-        isVisible = false;
-        modelEntity.removeAttribute('animation');
-        modelEntity.setAttribute('scale', '0 0 0');
-    });
-
-    loadModel(0);
-</script>
+</body>
+</html>
